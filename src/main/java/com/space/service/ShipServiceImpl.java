@@ -55,11 +55,35 @@ public class ShipServiceImpl implements ShipService {
     @Override
     public List<Ship> getPage(int page, int limit, String order) {
         List<Ship> returnValue = new ArrayList<>();
+        Sort.Direction direction = getDirection(order);
+        order = getFixOrder(order);
 
-        Pageable pageableRequest = PageRequest.of(page, limit, Sort.Direction.ASC,order.toLowerCase());
-        Page<Ship> users = shipRepository.findAll(pageableRequest);
-        List<Ship> ships = users.getContent();
+
+        Pageable pageableRequest = PageRequest.of(page, limit, direction, order);
+        Page<Ship> shipPage = shipRepository.findAll(pageableRequest);
+        List<Ship> ships = shipPage.getContent();
 
         return ships;
+    }
+
+    private String getFixOrder(String order) {
+        if (order.equals("DATE")) {
+            order = "prodDate";
+        }else {
+            order = order.toLowerCase();
+
+        }
+        return order;
+    }
+
+    private Sort.Direction getDirection(String order) {
+        Sort.Direction direction ;
+        if (order.equals("ID")) {
+            direction = Sort.Direction.ASC;
+        } else {
+            direction = Sort.Direction.DESC;
+        }
+
+        return direction;
     }
 }
