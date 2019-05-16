@@ -18,13 +18,10 @@ public interface ShipService {
     List<Ship> getAll();
 
     List<Ship> getPage(int page, int limit, String order);
-    @Query("from Ships s where s.name like %:name% and s.planet like %:planet%" +
-            " and s.shipType =:shiptype and s.prodDate > :after and s.prodDate < :before" +
-            " and s.isUsed = :isUsed and s.speed >= :minSpeed and s.speed <= :maxSpeed" +
-            " and s.rating >= :minRating and s.rating <= :maxRating ")
-    List<Ship> getPageShips(@Param("name") String name, String planet,@Param("planet") String planet,
-                            @Param("shiptype") String shiptype, @Param("prodDate") long prodDate,
-                            @Param("isUsed") boolean isUsed, @Param("minSpeed") double minSpeed,
-                            @Param("name") String name,@Param("name") String name,@Param("name") String name,
-                            @Param("name") String name,@Param("name") String name,int page, int limit, String order);
+
+    List<Ship> getPage(String name, String planet,String shipType,long prodDate,boolean isUsed,
+                            double minSpeed,double maxSpeed,int minCrewSize,int maxCrewSize,
+                            int page, int limit, String order);
+
+    List<Ship> findShips(int page, int limit);
 }
