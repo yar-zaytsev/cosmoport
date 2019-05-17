@@ -1,9 +1,7 @@
 package com.space.service;
 
 import com.space.model.Ship;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -19,9 +17,13 @@ public interface ShipService {
 
     List<Ship> getPage(int page, int limit, String order);
 
-    List<Ship> getPage(String name, String planet,String shipType,long prodDate,boolean isUsed,
+    /*List<Ship> getPage(String name, String planet,String shipType,long prodDate,boolean isUsed,
                             double minSpeed,double maxSpeed,int minCrewSize,int maxCrewSize,
-                            int page, int limit, String order);
+                            int page, int limit, String order);*/
 
-    List<Ship> findShips(int page, int limit);
+//    List<Ship> findShips(int page, int limit);
+    List<?> findShips(String name, String planet, String shipType, String after, String before,
+                      String isUsed, String minSpeed, String maxSpeed, String minCrewSize,
+                      String maxCrewSize, String minRating, String maxRating, String order,
+                      int page, int limit);
 }

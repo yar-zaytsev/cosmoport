@@ -34,10 +34,24 @@ public class ShipController {
 
     @RequestMapping(value = "/ships", method = RequestMethod.GET)
     @ResponseBody
-    public List<Ship> getAll(@RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber,
-                             @RequestParam(value = "pageSize", defaultValue = "3") int pageSize,
-                             @RequestParam(value = "order", defaultValue = "ID") String order) {
-        List<Ship> ships = shipService.getPage(pageNumber,pageSize,order);
+    public List<?> getAll(@RequestParam(value = "name", defaultValue = "%") String name,
+                             @RequestParam(value = "planet", defaultValue = "%") String planet,
+                             @RequestParam(value = "shipType", defaultValue = "%") String shipType,
+                             @RequestParam(value = "after", defaultValue = "%") String after,
+                             @RequestParam(value = "before", defaultValue = "%") String before,
+                             @RequestParam(value = "isUsed", defaultValue = "%") String isUsed,
+                             @RequestParam(value = "minSpeed", defaultValue = "%") String minSpeed,
+                             @RequestParam(value = "maxSpeed", defaultValue = "%") String maxSpeed,
+                             @RequestParam(value = "minCrewSize", defaultValue = "%") String minCrewSize,
+                             @RequestParam(value = "maxCrewSize", defaultValue = "%") String maxCrewSize,
+                             @RequestParam(value = "minRating", defaultValue = "%") String minRating,
+                             @RequestParam(value = "maxRating", defaultValue = "%") String maxRating,
+                             @RequestParam(value = "order", defaultValue = "ID") String order,
+                             @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber,
+                             @RequestParam(value = "pageSize", defaultValue = "3") int pageSize) {
+//        List<Ship> ships = shipService.getPage(pageNumber,pageSize,order);
+        List<?> ships = shipService.findShips(name,planet,shipType,after,before, isUsed,minSpeed ,maxSpeed ,
+                minCrewSize ,maxCrewSize,minRating ,maxRating , order, pageNumber,pageSize);
 
         return ships;
     }
