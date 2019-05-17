@@ -4,6 +4,7 @@ import com.space.model.ShipType;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -12,7 +13,7 @@ import java.util.Date;
 
 @Entity
 @Table(name = "ship")
-public class Ship {
+public class Ship implements Serializable {
 
     @Id
     @GeneratedValue(generator = "increment")

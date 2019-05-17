@@ -2,6 +2,7 @@ package com.space.service;
 
 import com.space.model.Ship;
 import com.space.repository.ShipRepository;
+import org.hibernate.query.Query;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -115,11 +117,11 @@ public class ShipServiceImpl implements ShipService {
        return null;
     }*/
 
-    public List<?> findShips(String name, String planet, String shipType, String after, String before,
-                             String isUsed, String minSpeed, String maxSpeed, String minCrewSize,
-                             String maxCrewSize,String minRating,String maxRating,String order,
-                             int page, int limit) {
-boolean where = false;
+    public List<Ship> findShips(String name, String planet, String shipType, String after, String before,
+                                String isUsed, String minSpeed, String maxSpeed, String minCrewSize,
+                                String maxCrewSize, String minRating, String maxRating, String order,
+                                int page, int limit) {
+/*boolean where = false;
         StringBuilder qsb = new StringBuilder("SELECT ship from Ship ship ");
         if(name != null) qsb.append(qsb.toString().contains("where") ? " " + name : "where " + name);
         if(name != null) qsb.append(qsb.toString().contains("where") ? " " + planet : "where " + planet);
@@ -132,7 +134,7 @@ boolean where = false;
 
 
 
-///*ship.shipType = :shipType and*/
+//*//*ship.shipType = :shipType and*//*
         List<?> movies = entityManager.createQuery("SELECT ship from Ship ship where" +
                 " ship.name like :name and ship.planet like :planet and " +
                 " ship.prodDate > :after and  ship.prodDate < :before and ship.isUsed = :isUsed and "+
@@ -155,7 +157,64 @@ boolean where = false;
                 .setFirstResult((page-1)*limit)
                 .setMaxResults(limit)
                 .getResultList();
-        return movies;
+        return movies;*/
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Ship> cr = cb.createQuery(Ship.class);
+        Root<Ship> root = cr.from(Ship.class);
+//        cr.select(root);
+        ArrayList<Predicate> predicates = new ArrayList<>();
+        if (name != null) predicates.add(cb.like(root.get("name"), name));
+        if (planet != null) predicates.add(cb.like(root.get("planet"), planet));
+
+        if (shipType != null) predicates.add(cb.like(root.get("shipType"), shipType));
+
+        if (after != null) predicates.add(cb.greaterThanOrEqualTo(root.get("prodDate"), after));
+        if (before != null) predicates.add(cb.lessThanOrEqualTo(root.get("prodDate"), before));
+
+        if (isUsed != null) predicates.add(cb.like(root.get("isUsed"), isUsed));
+
+        if (minSpeed != null) predicates.add(cb.greaterThanOrEqualTo(root.get("speed"), minSpeed));
+        if (maxSpeed != null) predicates.add(cb.lessThanOrEqualTo(root.get("speed"), maxSpeed));
+
+        if (minCrewSize != null) predicates.add(cb.greaterThanOrEqualTo(root.get("crewSize"), minCrewSize));
+        if (maxCrewSize != null) predicates.add(cb.lessThanOrEqualTo(root.get("crewSize"), maxCrewSize));
+
+        if (minRating != null) predicates.add(cb.greaterThanOrEqualTo(root.get("rating"), minRating));
+        if (maxRating != null) predicates.add(cb.lessThanOrEqualTo(root.get("rating"), maxRating));
+
+        if (maxSpeed != null) predicates.add(cb.lessThanOrEqualTo(root.get("speed"), maxSpeed));
+
+
+        Predicate[] predicatesArr =  predicates.toArray(new Predicate[predicates.size()]);
+//        predicates[0] = cb.isNull(root.get("itemDescription"));
+//        predicates[1] = cb.like(root.get("itemName"), "chair%");
+        cr.select(root).where(predicatesArr);
+
+        order = getFixOrder(order);
+
+        if (order.equals("id")) {
+
+            cr.orderBy(cb.asc(root.get("id")));
+        }else {
+            cr.orderBy(cb.desc(root.get(order)));
+
+        }
+
+        if (page > 0 && limit > 0) {
+            page = (page - 1) * limit;
+        }
+
+//        Query<Ship> query = entityManager.createQuery(cr);
+        TypedQuery<Ship> query = entityManager.createQuery(cr)
+                .setFirstResult(page)
+                .setMaxResults(limit);
+
+        List<Ship> results = query.getResultList();
+
+        return results;
+
+
     }
 
 
