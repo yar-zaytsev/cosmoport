@@ -23,7 +23,7 @@ public interface ShipService {
 
 //    List<Ship> findShips(int page, int limit);
     List<Ship> findShips(String name, String planet, String shipType, String after, String before,
-                      String isUsed, String minSpeed, String maxSpeed, String minCrewSize,
+                      Boolean isUsed, String minSpeed, String maxSpeed, String minCrewSize,
                       String maxCrewSize, String minRating, String maxRating, String order,
                       int page, int limit);
 }

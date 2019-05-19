@@ -6,6 +6,7 @@ import org.hibernate.query.Query;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
@@ -118,7 +119,7 @@ public class ShipServiceImpl implements ShipService {
     }*/
 
     public List<Ship> findShips(String name, String planet, String shipType, String after, String before,
-                                String isUsed, String minSpeed, String maxSpeed, String minCrewSize,
+                                Boolean isUsed, String minSpeed, String maxSpeed, String minCrewSize,
                                 String maxCrewSize, String minRating, String maxRating, String order,
                                 int page, int limit) {
 /*boolean where = false;
@@ -164,15 +165,16 @@ public class ShipServiceImpl implements ShipService {
         Root<Ship> root = cr.from(Ship.class);
 //        cr.select(root);
         ArrayList<Predicate> predicates = new ArrayList<>();
-        if (name != null) predicates.add(cb.like(root.get("name"), name));
-        if (planet != null) predicates.add(cb.like(root.get("planet"), planet));
+        if (name != null) predicates.add(cb.like(root.get("name"), "%" + name + "%"));
+        if (planet != null) predicates.add(cb.like(root.get("planet"), "%" + planet + "%"));
 
         if (shipType != null) predicates.add(cb.like(root.get("shipType"), shipType));
 
         if (after != null) predicates.add(cb.greaterThanOrEqualTo(root.get("prodDate"), after));
         if (before != null) predicates.add(cb.lessThanOrEqualTo(root.get("prodDate"), before));
 
-        if (isUsed != null) predicates.add(cb.like(root.get("isUsed"), isUsed));
+        if (isUsed != null) predicates.add(cb.equal(root.<Boolean>get("isUsed"), isUsed));
+//       predicates.add(cb.like(root.get("isUsed"), isUsed +""));
 
         if (minSpeed != null) predicates.add(cb.greaterThanOrEqualTo(root.get("speed"), minSpeed));
         if (maxSpeed != null) predicates.add(cb.lessThanOrEqualTo(root.get("speed"), maxSpeed));
@@ -201,10 +203,10 @@ public class ShipServiceImpl implements ShipService {
 
         }
 
-        if (page > 0 && limit > 0) {
+       /* if (page > 0 && limit > 0) {
             page = (page - 1) * limit;
-        }
-
+        }*/
+        page = page  * limit;
 //        Query<Ship> query = entityManager.createQuery(cr);
         TypedQuery<Ship> query = entityManager.createQuery(cr)
                 .setFirstResult(page)

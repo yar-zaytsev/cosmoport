@@ -39,7 +39,7 @@ public class ShipController {
                              @RequestParam(value = "shipType", required = false) String shipType,
                              @RequestParam(value = "after", required = false) String after,
                              @RequestParam(value = "before", required = false) String before,
-                             @RequestParam(value = "isUsed",  required = false) String isUsed,
+                             @RequestParam(value = "isUsed",  required = false, defaultValue = "false") Boolean isUsed,
                              @RequestParam(value = "minSpeed", required = false) String minSpeed,
                              @RequestParam(value = "maxSpeed", required = false) String maxSpeed,
                              @RequestParam(value = "minCrewSize",  required = false) String minCrewSize,
@@ -50,7 +50,7 @@ public class ShipController {
                              @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber,
                              @RequestParam(value = "pageSize", defaultValue = "3") int pageSize) {
 //        List<Ship> ships = shipService.getPage(pageNumber,pageSize,order);
-        List<?> ships = shipService.findShips(name,planet,shipType,after,before, isUsed,minSpeed ,maxSpeed ,
+        List<Ship> ships = shipService.findShips(name,planet,shipType,after,before, isUsed,minSpeed ,maxSpeed ,
                 minCrewSize ,maxCrewSize,minRating ,maxRating , order, pageNumber,pageSize);
 
         return ships;

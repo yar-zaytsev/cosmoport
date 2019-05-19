@@ -36,7 +36,7 @@ public class Ship implements Serializable {
     private Date prodDate;
 
     @Column(name = "isUsed")
-    private boolean isUsed;
+    private Boolean isUsed;
 
     @Column(name = "speed")
     private double speed;
