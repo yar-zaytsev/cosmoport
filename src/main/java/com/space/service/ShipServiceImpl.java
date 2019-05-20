@@ -1,6 +1,7 @@
 package com.space.service;
 
 import com.space.model.Ship;
+import com.space.model.ShipType;
 import com.space.repository.ShipRepository;
 import org.hibernate.query.Query;
 import org.springframework.beans.BeanUtils;
@@ -19,6 +20,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -64,8 +66,8 @@ public class ShipServiceImpl implements ShipService {
 
     @Override
     public List<Ship> getPage(int page, int limit, String order) {
-        List<Ship> returnValue = new ArrayList<>();
-        Sort.Direction direction = getDirection(order);
+//        List<Ship> returnValue = new ArrayList<>();
+//        Sort.Direction direction = getDirection(order);
 //        order = getFixOrder(order);
 //        ExampleMatcher matcher ExampleMatcher.matching()
 //                .withMatcher(targetShip.getName(), match -> match.contains().ignoreCase())
@@ -76,16 +78,17 @@ public class ShipServiceImpl implements ShipService {
 //        shipRepository.findByLikeNameLikePlanet
 
 
-        Pageable pageableRequest = PageRequest.of(page, limit, direction, order);
+//        Pageable pageableRequest = PageRequest.of(page, limit, direction, order);
 
 
-        Page<Ship> shipPage = shipRepository.findAll(pageableRequest);
+//        Page<Ship> shipPage = shipRepository.findAll(pageableRequest);
 //        Page<Ship> shipPage = shipRepository.findAll(pageableRequest);
 
 //        shipPage.
-        List<Ship> ships = shipPage.getContent();
+//        List<Ship> ships = shipPage.getContent();
 
-        return ships;
+//        return ships;
+        return null;
     }
 
     /*@Override
@@ -118,10 +121,10 @@ public class ShipServiceImpl implements ShipService {
        return null;
     }*/
 
-    public List<Ship> findShips(String name, String planet, String shipType, String after, String before,
-                                Boolean isUsed, String minSpeed, String maxSpeed, String minCrewSize,
-                                String maxCrewSize, String minRating, String maxRating, String order,
-                                int page, int limit) {
+    public List<Ship> findShips(String name, String planet, ShipType shipType, Long after, Long before,
+                                Boolean isUsed, Double minSpeed, Double maxSpeed, Integer minCrewSize,
+                                Integer maxCrewSize, Double minRating, Double maxRating, String order,
+                                Integer page, Integer limit) {
 /*boolean where = false;
         StringBuilder qsb = new StringBuilder("SELECT ship from Ship ship ");
         if(name != null) qsb.append(qsb.toString().contains("where") ? " " + name : "where " + name);
@@ -168,10 +171,10 @@ public class ShipServiceImpl implements ShipService {
         if (name != null) predicates.add(cb.like(root.get("name"), "%" + name + "%"));
         if (planet != null) predicates.add(cb.like(root.get("planet"), "%" + planet + "%"));
 
-        if (shipType != null) predicates.add(cb.like(root.get("shipType"), shipType));
+        if (shipType != null) predicates.add(cb.equal(root.<ShipType>get("shipType"), shipType));
 
-        if (after != null) predicates.add(cb.greaterThanOrEqualTo(root.get("prodDate"), after));
-        if (before != null) predicates.add(cb.lessThanOrEqualTo(root.get("prodDate"), before));
+        if (after != null) predicates.add(cb.greaterThanOrEqualTo(root.get("prodDate"), new Date(after)));
+        if (before != null) predicates.add(cb.lessThanOrEqualTo(root.get("prodDate"),new Date(before) ));
 
         if (isUsed != null) predicates.add(cb.equal(root.<Boolean>get("isUsed"), isUsed));
 //       predicates.add(cb.like(root.get("isUsed"), isUsed +""));
@@ -194,23 +197,27 @@ public class ShipServiceImpl implements ShipService {
         cr.select(root).where(predicatesArr);
 
         order = getFixOrder(order);
+        cr.orderBy(cb.asc(root.get(order)));
 
-        if (order.equals("id")) {
+        /*if (order.equals("id")) {
 
             cr.orderBy(cb.asc(root.get("id")));
         }else {
             cr.orderBy(cb.desc(root.get(order)));
 
-        }
+        }*/
 
        /* if (page > 0 && limit > 0) {
             page = (page - 1) * limit;
         }*/
-        page = page  * limit;
 //        Query<Ship> query = entityManager.createQuery(cr);
-        TypedQuery<Ship> query = entityManager.createQuery(cr)
-                .setFirstResult(page)
-                .setMaxResults(limit);
+        TypedQuery<Ship> query = entityManager.createQuery(cr);
+
+        if (limit !=0) {
+            page = page  * limit;
+            query.setFirstResult(page);
+            query.setMaxResults(limit);
+        }
 
         List<Ship> results = query.getResultList();
 
@@ -230,7 +237,7 @@ public class ShipServiceImpl implements ShipService {
         return order;
     }
 
-    private Sort.Direction getDirection(String order) {
+    /*private Sort.Direction getDirection(String order) {
         Sort.Direction direction;
         if (order.equals("ID")) {
             direction = Sort.Direction.ASC;
@@ -239,5 +246,5 @@ public class ShipServiceImpl implements ShipService {
         }
 
         return direction;
-    }
+    }*/
 }

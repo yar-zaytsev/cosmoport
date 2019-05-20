@@ -2,13 +2,18 @@ package com.space.controller;
 
 import com.space.model.Count;
 import com.space.model.Ship;
+import com.space.model.ShipType;
 import com.space.service.ShipService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Created by Ярпиво on 11.05.2019.
@@ -26,29 +31,43 @@ public class ShipController {
     // отвечать клиенту
     @RequestMapping(value = "/ships/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public Ship getById(@PathVariable long id) {
-        Ship ship = shipService.getById(id);
+    public ResponseEntity  getById(@PathVariable Long id) {
 
-        return ship;
+
+
+        try {
+            if (!(id > 0)) return new ResponseEntity(null, HttpStatus.BAD_REQUEST);
+
+            Ship ship = shipService.getById(id);
+
+            return new ResponseEntity<Ship>(ship, HttpStatus.OK);
+
+        } catch (NoSuchElementException e ) {
+            return new ResponseEntity(null, HttpStatus.NOT_FOUND);
+
+        }catch (NumberFormatException e) {
+            return new ResponseEntity(null, HttpStatus.BAD_REQUEST);
+
+        }
     }
 
     @RequestMapping(value = "/ships", method = RequestMethod.GET)
     @ResponseBody
-    public List<?> getAll(@RequestParam(value = "name", required = false) String name,
+    public List<Ship> getAll(@RequestParam(value = "name", required = false) String name,
                              @RequestParam(value = "planet", required = false) String planet,
-                             @RequestParam(value = "shipType", required = false) String shipType,
-                             @RequestParam(value = "after", required = false) String after,
-                             @RequestParam(value = "before", required = false) String before,
-                             @RequestParam(value = "isUsed",  required = false, defaultValue = "false") Boolean isUsed,
-                             @RequestParam(value = "minSpeed", required = false) String minSpeed,
-                             @RequestParam(value = "maxSpeed", required = false) String maxSpeed,
-                             @RequestParam(value = "minCrewSize",  required = false) String minCrewSize,
-                             @RequestParam(value = "maxCrewSize",  required = false) String maxCrewSize,
-                             @RequestParam(value = "minRating",  required = false) String minRating,
-                             @RequestParam(value = "maxRating",  required = false) String maxRating,
+                             @RequestParam(value = "shipType", required = false) ShipType shipType,
+                             @RequestParam(value = "after", required = false) Long after,
+                             @RequestParam(value = "before", required = false) Long before,
+                             @RequestParam(value = "isUsed",  required = false) Boolean isUsed,
+                             @RequestParam(value = "minSpeed", required = false) Double minSpeed,
+                             @RequestParam(value = "maxSpeed", required = false) Double maxSpeed,
+                             @RequestParam(value = "minCrewSize",  required = false) Integer minCrewSize,
+                             @RequestParam(value = "maxCrewSize",  required = false) Integer maxCrewSize,
+                             @RequestParam(value = "minRating",  required = false) Double minRating,
+                             @RequestParam(value = "maxRating",  required = false) Double maxRating,
                              @RequestParam(value = "order", defaultValue = "ID") String order,
-                             @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber,
-                             @RequestParam(value = "pageSize", defaultValue = "3") int pageSize) {
+                             @RequestParam(value = "pageNumber", defaultValue = "0") Integer pageNumber,
+                             @RequestParam(value = "pageSize", defaultValue = "3") Integer pageSize) {
 //        List<Ship> ships = shipService.getPage(pageNumber,pageSize,order);
         List<Ship> ships = shipService.findShips(name,planet,shipType,after,before, isUsed,minSpeed ,maxSpeed ,
                 minCrewSize ,maxCrewSize,minRating ,maxRating , order, pageNumber,pageSize);
@@ -75,7 +94,26 @@ public class ShipController {
 
     @RequestMapping(value = "/ships/count", method = RequestMethod.GET)
     @ResponseBody
-    public Integer getCount(@RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber,
+    public Integer getCount(@RequestParam(value = "name", required = false) String name,
+                            @RequestParam(value = "planet", required = false) String planet,
+                            @RequestParam(value = "shipType", required = false) ShipType shipType,
+                            @RequestParam(value = "after", required = false) Long after,
+                            @RequestParam(value = "before", required = false) Long before,
+                            @RequestParam(value = "isUsed",  required = false) Boolean isUsed,
+                            @RequestParam(value = "minSpeed", required = false) Double minSpeed,
+                            @RequestParam(value = "maxSpeed", required = false) Double maxSpeed,
+                            @RequestParam(value = "minCrewSize",  required = false) Integer minCrewSize,
+                            @RequestParam(value = "maxCrewSize",  required = false) Integer maxCrewSize,
+                            @RequestParam(value = "minRating",  required = false) Double minRating,
+                            @RequestParam(value = "maxRating",  required = false) Double maxRating) {
+
+        List<Ship> ships = shipService.findShips(name,planet,shipType,after,before, isUsed,minSpeed ,maxSpeed ,
+                minCrewSize ,maxCrewSize,minRating ,maxRating , "id", 0,0);
+
+        return ships.size();
+    }
+
+    /*public Integer getCount(@RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber,
                             @RequestParam(value = "pageSize", defaultValue = "0") int pageSize,
                             @RequestParam(value = "order", defaultValue = "ID") String order) {
         List<Ship> ships;
@@ -87,7 +125,7 @@ public class ShipController {
 
         return ships.size();
 
-    }
+    }*/
 
 
 //        // этот метод будет принимать Объект MyDataObject и отдавать его клиенту

@@ -39,13 +39,13 @@ public class Ship implements Serializable {
     private Boolean isUsed;
 
     @Column(name = "speed")
-    private double speed;
+    private Double speed;
 
     @Column(name = "crewSize")
-    private int crewSize;
+    private Integer crewSize;
 
     @Column(name = "rating")
-    private double rating;
+    private Double rating;
 
     protected Ship() {
     }

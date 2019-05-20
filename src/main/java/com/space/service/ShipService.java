@@ -1,6 +1,8 @@
 package com.space.service;
 
 import com.space.model.Ship;
+import com.space.model.ShipType;
+
 import java.util.Calendar;
 import java.util.List;
 
@@ -22,8 +24,8 @@ public interface ShipService {
                             int page, int limit, String order);*/
 
 //    List<Ship> findShips(int page, int limit);
-    List<Ship> findShips(String name, String planet, String shipType, String after, String before,
-                      Boolean isUsed, String minSpeed, String maxSpeed, String minCrewSize,
-                      String maxCrewSize, String minRating, String maxRating, String order,
-                      int page, int limit);
+    List<Ship> findShips(String name, String planet, ShipType shipType, Long after, Long before,
+                         Boolean isUsed, Double minSpeed, Double maxSpeed, Integer minCrewSize,
+                         Integer maxCrewSize, Double minRating, Double maxRating, String order,
+                         Integer page, Integer limit);
 }
