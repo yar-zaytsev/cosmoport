@@ -7,6 +7,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 
+
 /**
  * Created by Ярпиво on 10.05.2019.
  */
@@ -21,7 +22,9 @@ public class Ship implements Serializable {
     @Column(name = "id", length = 6, nullable = false)
     private long id;
 
+
     @Column(name = "name")
+    @Size(min = 4, max = 15)
     private String name;
 
     @Column(name = "planet")
