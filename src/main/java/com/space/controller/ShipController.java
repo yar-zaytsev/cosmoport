@@ -1,18 +1,14 @@
 package com.space.controller;
 
-import com.space.model.Count;
 import com.space.model.Ship;
 import com.space.model.ShipType;
 import com.space.service.ShipService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -35,11 +31,12 @@ public class ShipController {
     public ResponseEntity getById(@PathVariable Long id) {
 
         try {
-            if (id < 1) return new ResponseEntity(HttpStatus.BAD_REQUEST);
-
-            Ship ship = shipService.getById(id);
-
-            return new ResponseEntity<Ship>(ship, HttpStatus.OK);
+            if (id > 0) {
+                Ship ship = shipService.getById(id);
+                return new ResponseEntity<Ship>(ship, HttpStatus.OK);
+            } else {
+                return new ResponseEntity(HttpStatus.BAD_REQUEST);
+            }
 
         } catch (NoSuchElementException e) {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
@@ -53,12 +50,16 @@ public class ShipController {
     @ResponseBody
     public ResponseEntity createShip(@RequestBody Ship ship) {
 
-        boolean isNotValid = false;
+        if (shipService.isValid(ship)) {
+            Ship newShip = shipService.addShip(ship);
 
-        if (ship.getName().isEmpty() || (ship.getName().length() > 50)) isNotValid = true;
-        if (ship.getPlanet().isEmpty() || ship.getPlanet().length() > 50) isNotValid = true;
-        if (ship.getShipType() ==null || ShipType. ship.getShipType().) isNotValid = true;
-        if (ship.getName().length() > 50) isNotValid = true;
+            return new ResponseEntity<Ship>(newShip, HttpStatus.OK);
+        }
+        else{
+
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
+
     }
 
     @RequestMapping(value = "/ships", method = RequestMethod.GET)

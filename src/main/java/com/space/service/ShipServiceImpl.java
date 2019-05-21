@@ -4,6 +4,7 @@ import com.space.model.Ship;
 import com.space.model.ShipType;
 import com.space.repository.ShipRepository;
 import org.hibernate.query.Query;
+import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -18,16 +19,27 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+import java.math.BigDecimal;
+import java.util.*;
 
 /**
  * Created by Ярпиво on 10.05.2019.
  */
 @Service
 public class ShipServiceImpl implements ShipService {
+    private static final Validator VALIDATOR =
+            Validation.byDefaultProvider()
+                    .configure()
+                    .messageInterpolator(new ParameterMessageInterpolator())
+                    .buildValidatorFactory()
+                    .getValidator();
+
+
+
     @Autowired
     private EntityManager entityManager;
 
@@ -36,7 +48,28 @@ public class ShipServiceImpl implements ShipService {
 
     @Override
     public Ship addShip(Ship ship) {
-        return null;
+
+        Boolean isUsed = ship.isUsed();
+
+
+        double rating = getRating(ship);
+
+        Ship newShip = new Ship(ship.getName(),ship.getPlanet(), ship.getShipType(),ship.getProdDate(), isUsed,
+                                ship.getSpeed(), ship.getCrewSize(), rating);
+
+        return shipRepository.save(newShip);
+//        return shipRepository.save(newShip);
+    }
+
+    private double getRating(Ship ship) {
+
+        double k = ship.isUsed() ? 0.5 : 1;
+        int prodDateYear = ship.getProdDate().getYear() + 1900;
+        double rating = (80 * ship.getSpeed() * k)/ (3019 - prodDateYear + 1);
+
+        rating =  new BigDecimal(rating).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+
+        return rating;
     }
 
     @Override
@@ -224,6 +257,35 @@ public class ShipServiceImpl implements ShipService {
         return results;
 
 
+    }
+
+    @Override
+    public boolean isValid(Ship ship) {
+        boolean isValid = true;
+
+        /*ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+*/
+        Set<ConstraintViolation<Ship>> violations = VALIDATOR.validate(ship);
+
+
+
+        if (violations.size() > 0) isValid = false;
+
+        if (isValid) {
+            long prodDate = ship.getProdDate().getTime();
+
+            if (prodDate < 0) isValid = false;
+
+            int prodYear = ship.getProdDate().getYear() + 1900;
+
+            if (prodYear < 2800) isValid = false;
+            if (prodYear > 3019) isValid = false;
+
+            if(ship.isUsed() == null)  ship.setUsed(false);
+        }
+
+        return isValid;
     }
 
 

@@ -28,4 +28,6 @@ public interface ShipService {
                          Boolean isUsed, Double minSpeed, Double maxSpeed, Integer minCrewSize,
                          Integer maxCrewSize, Double minRating, Double maxRating, String order,
                          Integer page, Integer limit);
+
+    boolean isValid(Ship ship);
 }
