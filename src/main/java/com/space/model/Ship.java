@@ -1,24 +1,11 @@
 package com.space.model;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.springframework.validation.annotation.Validated;
-//import org.springframework.validation.annotation.Validated;
-
 import javax.persistence.*;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Date;
 
 
-
-import javax.validation.constraints.*;
-
-/**
- * Created by Ярпиво on 10.05.2019.
- */
-
 @Entity
-//@Validated
 @Table(name = "ship")
 public class Ship implements Serializable {
 
@@ -28,38 +15,27 @@ public class Ship implements Serializable {
     private long id;
 
     @Column(name = "name")
-    @NotEmpty(message = "name not be empty")
-    @Size(max = 50, message = "Name must be less  50")
     private String name;
 
 
     @Column(name = "planet")
-    @NotEmpty(message = "planet not be empty")
-    @Size(max = 50, message = "Planet must be less 50")
     private String planet;
 
 
     @Column(name = "shipType")
     @Enumerated(EnumType.STRING)
-    @NotNull(message = "ShipType not be null")
     private ShipType shipType;
 
     @Column(name = "prodDate")
-    @NotNull
     private Date prodDate;
 
     @Column(name = "isUsed")
     private Boolean isUsed;
 
     @Column(name = "speed")
-    @NotNull
-    @DecimalMin("0.01")
-    @DecimalMax("0.99")
     private Double speed;
 
     @Column(name = "crewSize")
-    @NotNull
-    @Min(1) @Max(9999)
     private Integer crewSize;
 
     @Column(name = "rating")
@@ -67,7 +43,6 @@ public class Ship implements Serializable {
 
     public Ship() {
     }
-
 
     public Ship(String name, String planet, ShipType shipType, Date prodDate, boolean isUsed, double speed, int crewSize, double rating) {
         this.name = name;
@@ -134,7 +109,6 @@ public class Ship implements Serializable {
 
     public void setSpeed(double speed) {
         this.speed = speed;
-//        this.speed = new BigDecimal(speed).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
     public Integer getCrewSize() {
