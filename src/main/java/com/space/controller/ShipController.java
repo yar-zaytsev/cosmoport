@@ -24,18 +24,10 @@ public class ShipController {
     @RequestMapping(value = "/ships/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getById(@PathVariable Long id) {
-        try {
-            if (id > 0) {
-                Ship ship = shipService.getById(id);
-                return new ResponseEntity<Ship>(ship, HttpStatus.OK);
-            } else {
-                return new ResponseEntity(HttpStatus.BAD_REQUEST);
-            }
-        } catch (NoSuchElementException e) {
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
-        } catch (NumberFormatException e) {
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
-        }
+        if (!shipService.isValid(id)) return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        if (!shipService.isExistById(id)) return new ResponseEntity(HttpStatus.NOT_FOUND);
+        Ship ship = shipService.getById(id);
+        return new ResponseEntity<Ship>(ship, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/ships", method = RequestMethod.POST)
