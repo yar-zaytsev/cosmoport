@@ -1,35 +1,21 @@
 package com.space.service;
 
+import com.space.controller.ShipOrder;
 import com.space.model.Ship;
 import com.space.model.ShipType;
 import com.space.repository.ShipRepository;
-import org.hibernate.query.Query;
-import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Persistence;
-import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
-import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.util.*;
 
-/**
- * Created by Ярпиво on 10.05.2019.
- */
 @Service
 public class ShipServiceImpl implements ShipService {
 
@@ -55,7 +41,9 @@ public class ShipServiceImpl implements ShipService {
 //        ship.setId(0);
 //        Ship newShip = new Ship(ship.getName(),ship.getPlanet(), ship.getShipType(),ship.getProdDate(), isUsed,
 //                                ship.getSpeed(), ship.getCrewSize(), rating);
-        shipRepository.saveAndFlush(ship);
+        ship.setId(0);
+        updateRating(ship);
+        shipRepository.save(ship);
 //        return ship;
     }
 
@@ -156,7 +144,7 @@ public class ShipServiceImpl implements ShipService {
 
     public List<Ship> findShips(String name, String planet, ShipType shipType, Long after, Long before,
                                 Boolean isUsed, Double minSpeed, Double maxSpeed, Integer minCrewSize,
-                                Integer maxCrewSize, Double minRating, Double maxRating, String order,
+                                Integer maxCrewSize, Double minRating, Double maxRating, ShipOrder order,
                                 Integer page, Integer limit) {
 /*boolean where = false;
         StringBuilder qsb = new StringBuilder("SELECT ship from Ship ship ");
@@ -229,8 +217,8 @@ public class ShipServiceImpl implements ShipService {
 //        predicates[1] = cb.like(root.get("itemName"), "chair%");
         cr.select(root).where(predicatesArr);
 
-        order = getFixOrder(order);
-        cr.orderBy(cb.asc(root.get(order)));
+//        order = getFixOrder(order);
+        cr.orderBy(cb.asc(root.get(order.getFieldName())));
 
         /*if (order.equals("id")) {
 
@@ -300,13 +288,53 @@ public class ShipServiceImpl implements ShipService {
             if (prodYear < 2800) isValid = false;
             if (prodYear > 3019) isValid = false;
             if (ship.isUsed() == null) ship.setUsed(false);
-            ship.setId(0);
         }
         return isValid;
     }
 
+    @Override
+    public boolean isValid(Long id) {
+        boolean isValid = false;
+        try {
+            if (id > 0) isValid =  true;
+        } catch (Exception e) {
+            isValid = false;
+        }
+        return isValid;
+    }
 
-    private String getFixOrder(String order) {
+    @Override
+    public boolean isValidForUpdate(Long id, Ship newShip) {
+        boolean isValid = false;
+        Optional<Ship> optionalShip =  shipRepository.findById(id);
+        if (optionalShip.isPresent()) {
+            Ship oldShip = optionalShip.get();
+            newShip.setId(id);
+            if(newShip.getName() == null) newShip.setName(oldShip.getName());
+            if(newShip.getPlanet() == null) newShip.setPlanet(oldShip.getPlanet());
+            if(newShip.getShipType() == null) newShip.setShipType(oldShip.getShipType());
+            if(newShip.getProdDate() == null) newShip.setProdDate(oldShip.getProdDate());
+            if(newShip.isUsed() == null) newShip.setUsed(oldShip.isUsed());
+            if(newShip.getSpeed() == null) newShip.setSpeed(oldShip.getSpeed());
+            if(newShip.getCrewSize() == null) newShip.setCrewSize(oldShip.getCrewSize());
+            if(isValid(newShip)) isValid = true;
+        }
+        return isValid;
+    }
+
+    @Override
+    public void updateShip(Ship ship) {
+        updateRating(ship);
+        shipRepository.save(ship);
+    }
+
+    @Override
+    public boolean isExistById(Long id) {
+        return shipRepository.existsById(id);
+    }
+
+
+    /*private String getFixOrder(String order) {
         if (order.equals("DATE")) {
             order = "prodDate";
         } else {
@@ -314,7 +342,7 @@ public class ShipServiceImpl implements ShipService {
 
         }
         return order;
-    }
+    }*/
 
     /*private Sort.Direction getDirection(String order) {
         Sort.Direction direction;

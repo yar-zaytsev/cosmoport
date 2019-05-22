@@ -3,7 +3,6 @@ package com.space.controller;
 import com.space.model.Ship;
 import com.space.model.ShipType;
 import com.space.service.ShipService;
-import javassist.tools.web.BadHttpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,12 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-/**
- * Created by Ярпиво on 11.05.2019.
- */
-
 @Controller
-// мапим наш REST на /myservice
 @RequestMapping(value = "rest/")
 public class ShipController {
     @Autowired
@@ -30,7 +24,6 @@ public class ShipController {
     @RequestMapping(value = "/ships/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getById(@PathVariable Long id) {
-
         try {
             if (id > 0) {
                 Ship ship = shipService.getById(id);
@@ -38,10 +31,8 @@ public class ShipController {
             } else {
                 return new ResponseEntity(HttpStatus.BAD_REQUEST);
             }
-
         } catch (NoSuchElementException e) {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
-
         } catch (NumberFormatException e) {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
@@ -51,26 +42,22 @@ public class ShipController {
     @ResponseBody
     public ResponseEntity createShip(@RequestBody Ship ship) {
         if (shipService.isValid(ship)) {
-            shipService.updateRating(ship);
             shipService.addShip(ship);
             return new ResponseEntity<Ship>(ship, HttpStatus.OK);
-        }
-        else{
+        } else {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
     }
 
-   /* @RequestMapping(value = "/ships", method = RequestMethod.POST)
+    @RequestMapping(value = "/ships/{id}", method = RequestMethod.POST)
     @ResponseBody
-    public Ship createShip(@RequestBody Ship ship) throws BadHttpRequest {
-        if (shipService.isValid(ship)) {
-            return shipService.addShip(ship);
-//             new ResponseEntity<Ship>(ship, HttpStatus.OK);
-        }
-        else{
-            throw  new BadRequestException();
-        }
-    }*/
+    public ResponseEntity updateShip(@RequestBody Ship ship, @PathVariable Long id) {
+        if (!shipService.isValid(id)) return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        if (!shipService.isExistById(id)) return new ResponseEntity(HttpStatus.NOT_FOUND);
+        if (!shipService.isValidForUpdate(id, ship)) return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        shipService.updateShip(ship);
+        return new ResponseEntity<Ship>(ship, HttpStatus.OK);
+    }
 
     @RequestMapping(value = "/ships", method = RequestMethod.GET)
     @ResponseBody
@@ -86,32 +73,14 @@ public class ShipController {
                              @RequestParam(value = "maxCrewSize", required = false) Integer maxCrewSize,
                              @RequestParam(value = "minRating", required = false) Double minRating,
                              @RequestParam(value = "maxRating", required = false) Double maxRating,
-                             @RequestParam(value = "order", defaultValue = "ID") String order,
+                             @RequestParam(value = "order", required = false) ShipOrder order,
                              @RequestParam(value = "pageNumber", defaultValue = "0") Integer pageNumber,
                              @RequestParam(value = "pageSize", defaultValue = "3") Integer pageSize) {
 //        List<Ship> ships = shipService.getPage(pageNumber,pageSize,order);
         List<Ship> ships = shipService.findShips(name, planet, shipType, after, before, isUsed, minSpeed, maxSpeed,
                 minCrewSize, maxCrewSize, minRating, maxRating, order, pageNumber, pageSize);
-
         return ships;
     }
-
-
-    /*@RequestMapping(value = "/ships", method = RequestMethod.GET)
-    @ResponseBody
-    public List<Ship> getAll() {
-        List<Ship> ships = shipService.getAll();
-
-        return ships;
-    }*/
-   /* @RequestMapping(value = "/ships/count", method = RequestMethod.GET)
-    @ResponseBody
-    public Integer getCount() {
-        List<Ship> ships = shipService.getAll();
-
-        return ships.size();
-
-    }*/
 
     @RequestMapping(value = "/ships/count", method = RequestMethod.GET)
     @ResponseBody
@@ -129,7 +98,7 @@ public class ShipController {
                             @RequestParam(value = "maxRating", required = false) Double maxRating) {
 
         List<Ship> ships = shipService.findShips(name, planet, shipType, after, before, isUsed, minSpeed, maxSpeed,
-                minCrewSize, maxCrewSize, minRating, maxRating, "id", 0, 0);
+                minCrewSize, maxCrewSize, minRating, maxRating, ShipOrder.ID, 0, 0);
 
         return ships.size();
     }
