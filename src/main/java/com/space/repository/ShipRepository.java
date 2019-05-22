@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Created by Ярпиво on 10.05.2019.
  */
-public interface ShipRepository extends PagingAndSortingRepository<Ship, Long>, JpaSpecificationExecutor {
+public interface ShipRepository extends JpaRepository<Ship, Long>/*, JpaSpecificationExecutor*/ {
 
 
 

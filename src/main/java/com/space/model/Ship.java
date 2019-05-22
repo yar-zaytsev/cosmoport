@@ -23,9 +23,8 @@ import javax.validation.constraints.*;
 public class Ship implements Serializable {
 
     @Id
-    @GeneratedValue(generator = "increment")
-    @GenericGenerator(name= "increment", strategy= "increment")
-    @Column(name = "id", length = 6, nullable = false)
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Column(name = "name")
@@ -66,7 +65,7 @@ public class Ship implements Serializable {
     @Column(name = "rating")
     private Double rating;
 
-    protected Ship() {
+    public Ship() {
     }
 
 
@@ -81,7 +80,7 @@ public class Ship implements Serializable {
         this.rating = rating;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
@@ -129,15 +128,16 @@ public class Ship implements Serializable {
         isUsed = used;
     }
 
-    public double getSpeed() {
+    public Double getSpeed() {
         return speed;
     }
 
     public void setSpeed(double speed) {
-        this.speed = new BigDecimal(speed).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+        this.speed = speed;
+//        this.speed = new BigDecimal(speed).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
-    public int getCrewSize() {
+    public Integer getCrewSize() {
         return crewSize;
     }
 
@@ -145,7 +145,7 @@ public class Ship implements Serializable {
         this.crewSize = crewSize;
     }
 
-    public double getRating() {
+    public Double getRating() {
         return rating;
     }
 

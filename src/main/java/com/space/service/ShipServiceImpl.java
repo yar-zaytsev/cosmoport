@@ -23,6 +23,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -31,13 +32,6 @@ import java.util.*;
  */
 @Service
 public class ShipServiceImpl implements ShipService {
-    private static final Validator VALIDATOR =
-            Validation.byDefaultProvider()
-                    .configure()
-                    .messageInterpolator(new ParameterMessageInterpolator())
-                    .buildValidatorFactory()
-                    .getValidator();
-
 
 
     @Autowired
@@ -45,31 +39,37 @@ public class ShipServiceImpl implements ShipService {
 
     @Autowired
     private ShipRepository shipRepository;
+    /*private static final Validator VALIDATOR =
+            Validation.byDefaultProvider()
+                    .configure()
+                    .messageInterpolator(new ParameterMessageInterpolator())
+                    .buildValidatorFactory()
+                    .getValidator();*/
 
     @Override
-    public Ship addShip(Ship ship) {
-
-        Boolean isUsed = ship.isUsed();
-
-
-        double rating = getRating(ship);
-
-        Ship newShip = new Ship(ship.getName(),ship.getPlanet(), ship.getShipType(),ship.getProdDate(), isUsed,
-                                ship.getSpeed(), ship.getCrewSize(), rating);
-
-        return shipRepository.save(newShip);
-//        return shipRepository.save(newShip);
+    public void addShip(Ship ship) {
+//
+//        Boolean isUsed = ship.isUsed();
+//        double rating = getRating(ship);
+//        ship.setRating(rating);
+//        ship.setId(0);
+//        Ship newShip = new Ship(ship.getName(),ship.getPlanet(), ship.getShipType(),ship.getProdDate(), isUsed,
+//                                ship.getSpeed(), ship.getCrewSize(), rating);
+        shipRepository.saveAndFlush(ship);
+//        return ship;
     }
 
-    private double getRating(Ship ship) {
+    public void updateRating(Ship ship) {
 
-        double k = ship.isUsed() ? 0.5 : 1;
-        int prodDateYear = ship.getProdDate().getYear() + 1900;
-        double rating = (80 * ship.getSpeed() * k)/ (3019 - prodDateYear + 1);
+        if (ship.isUsed() != null && ship.getProdDate() != null && ship.getSpeed() != null) {
+            double k = ship.isUsed() ? 0.5 : 1;
+            int prodDateYear = ship.getProdDate().getYear() + 1900;
+            double rating = (80 * ship.getSpeed() * k) / (3019 - prodDateYear + 1);
 
-        rating =  new BigDecimal(rating).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+            rating = new BigDecimal(rating).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
 
-        return rating;
+            ship.setRating(rating);
+        }
     }
 
     @Override
@@ -207,7 +207,7 @@ public class ShipServiceImpl implements ShipService {
         if (shipType != null) predicates.add(cb.equal(root.<ShipType>get("shipType"), shipType));
 
         if (after != null) predicates.add(cb.greaterThanOrEqualTo(root.get("prodDate"), new Date(after)));
-        if (before != null) predicates.add(cb.lessThanOrEqualTo(root.get("prodDate"),new Date(before) ));
+        if (before != null) predicates.add(cb.lessThanOrEqualTo(root.get("prodDate"), new Date(before)));
 
         if (isUsed != null) predicates.add(cb.equal(root.<Boolean>get("isUsed"), isUsed));
 //       predicates.add(cb.like(root.get("isUsed"), isUsed +""));
@@ -224,7 +224,7 @@ public class ShipServiceImpl implements ShipService {
         if (maxSpeed != null) predicates.add(cb.lessThanOrEqualTo(root.get("speed"), maxSpeed));
 
 
-        Predicate[] predicatesArr =  predicates.toArray(new Predicate[predicates.size()]);
+        Predicate[] predicatesArr = predicates.toArray(new Predicate[predicates.size()]);
 //        predicates[0] = cb.isNull(root.get("itemDescription"));
 //        predicates[1] = cb.like(root.get("itemName"), "chair%");
         cr.select(root).where(predicatesArr);
@@ -246,8 +246,8 @@ public class ShipServiceImpl implements ShipService {
 //        Query<Ship> query = entityManager.createQuery(cr);
         TypedQuery<Ship> query = entityManager.createQuery(cr);
 
-        if (limit !=0) {
-            page = page  * limit;
+        if (limit != 0) {
+            page = page * limit;
             query.setFirstResult(page);
             query.setMaxResults(limit);
         }
@@ -263,28 +263,45 @@ public class ShipServiceImpl implements ShipService {
     public boolean isValid(Ship ship) {
         boolean isValid = true;
 
-        /*ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        Validator validator = factory.getValidator();
-*/
-        Set<ConstraintViolation<Ship>> violations = VALIDATOR.validate(ship);
-
-
-
-        if (violations.size() > 0) isValid = false;
-
+        /*Set<ConstraintViolation<Ship>> violations = VALIDATOR.validate(ship);
+        if (violations.size() > 0) isValid = false;*/
+        if (ship.getName() == null) {
+            isValid = false;
+        } else {
+            if (ship.getName().isEmpty()) isValid = false;
+            if (ship.getName().length() > 50) isValid = false;
+        }
+        if (ship.getPlanet() == null) {
+            isValid = false;
+        } else {
+            if (ship.getPlanet().isEmpty()) isValid = false;
+            if (ship.getPlanet().length() > 50) isValid = false;
+        }
+        if (ship.getShipType() == null) {
+            isValid = false;
+        } else {
+            if (!Arrays.asList(ShipType.values()).contains(ship.getShipType())) isValid = false;
+        }
+        if (ship.getSpeed() == null) {
+            isValid = false;
+        } else {
+            if (0.01d > ship.getSpeed() || ship.getSpeed() > 0.99d) isValid = false;
+        }
+        if (ship.getCrewSize() == null) {
+            isValid = false;
+        } else {
+            if (ship.getCrewSize() < 1 || ship.getCrewSize() > 9999) isValid = false;
+        }
+        if (ship.getProdDate() == null) isValid = false;
         if (isValid) {
             long prodDate = ship.getProdDate().getTime();
-
             if (prodDate < 0) isValid = false;
-
             int prodYear = ship.getProdDate().getYear() + 1900;
-
             if (prodYear < 2800) isValid = false;
             if (prodYear > 3019) isValid = false;
-
-            if(ship.isUsed() == null)  ship.setUsed(false);
+            if (ship.isUsed() == null) ship.setUsed(false);
+            ship.setId(0);
         }
-
         return isValid;
     }
 

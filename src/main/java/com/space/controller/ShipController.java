@@ -3,6 +3,7 @@ package com.space.controller;
 import com.space.model.Ship;
 import com.space.model.ShipType;
 import com.space.service.ShipService;
+import javassist.tools.web.BadHttpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,18 +50,27 @@ public class ShipController {
     @RequestMapping(value = "/ships", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity createShip(@RequestBody Ship ship) {
-
         if (shipService.isValid(ship)) {
-            Ship newShip = shipService.addShip(ship);
-
-            return new ResponseEntity<Ship>(newShip, HttpStatus.OK);
+            shipService.updateRating(ship);
+            shipService.addShip(ship);
+            return new ResponseEntity<Ship>(ship, HttpStatus.OK);
         }
         else{
-
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
-
     }
+
+   /* @RequestMapping(value = "/ships", method = RequestMethod.POST)
+    @ResponseBody
+    public Ship createShip(@RequestBody Ship ship) throws BadHttpRequest {
+        if (shipService.isValid(ship)) {
+            return shipService.addShip(ship);
+//             new ResponseEntity<Ship>(ship, HttpStatus.OK);
+        }
+        else{
+            throw  new BadRequestException();
+        }
+    }*/
 
     @RequestMapping(value = "/ships", method = RequestMethod.GET)
     @ResponseBody
