@@ -40,6 +40,14 @@ public class ShipController {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
     }
+    @RequestMapping(value = "/ships/{id}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public ResponseEntity deleteById(@PathVariable Long id) {
+        if (!shipService.isValid(id)) return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        if (!shipService.isExistById(id)) return new ResponseEntity(HttpStatus.NOT_FOUND);
+        shipService.delete(id);
+        return new ResponseEntity<Ship>(HttpStatus.OK);
+    }
 
     @RequestMapping(value = "/ships/{id}", method = RequestMethod.POST)
     @ResponseBody

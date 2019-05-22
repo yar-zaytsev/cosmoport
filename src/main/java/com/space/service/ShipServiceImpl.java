@@ -60,10 +60,6 @@ public class ShipServiceImpl implements ShipService {
         }
     }
 
-    @Override
-    public void delete(long id) {
-
-    }
 
     @Override
     public Ship getByName(String name) {
@@ -217,8 +213,9 @@ public class ShipServiceImpl implements ShipService {
 //        predicates[1] = cb.like(root.get("itemName"), "chair%");
         cr.select(root).where(predicatesArr);
 
-//        order = getFixOrder(order);
-        cr.orderBy(cb.asc(root.get(order.getFieldName())));
+       String orderString = getFixOrder(order);
+//        String o = order.name().toLowerCase();
+        cr.orderBy(cb.asc(root.get(orderString)));
 
         /*if (order.equals("id")) {
 
@@ -323,6 +320,11 @@ public class ShipServiceImpl implements ShipService {
     }
 
     @Override
+    public void delete(Long id) {
+        shipRepository.deleteById(id);
+    }
+
+    @Override
     public void updateShip(Ship ship) {
         updateRating(ship);
         shipRepository.save(ship);
@@ -334,15 +336,17 @@ public class ShipServiceImpl implements ShipService {
     }
 
 
-    /*private String getFixOrder(String order) {
-        if (order.equals("DATE")) {
+    private String getFixOrder(ShipOrder order) {
+        if (order == null) return "id";
+        return order.name().toLowerCase();
+        /*if (order.equals("DATE")) {
             order = "prodDate";
         } else {
             order = order.toLowerCase();
 
         }
-        return order;
-    }*/
+        return order;*/
+    }
 
     /*private Sort.Direction getDirection(String order) {
         Sort.Direction direction;

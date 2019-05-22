@@ -12,7 +12,7 @@ import java.util.List;
 public interface ShipService {
     void addShip(Ship ship);
     void updateRating(Ship ship);
-    void delete(long id);
+    void delete(Long id);
     void updateShip(Ship ship);
     Ship getByName(String name);
     Ship getById(long id);
